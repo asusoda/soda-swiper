@@ -5,6 +5,8 @@ import requests
 import os
 import re
 import logging
+import datetime 
+import threading 
 bad_resp_match = lambda status: re.match(r"^[4,5][0-9][0-9]$",status)
 
 def handle_chimp_response(func):
@@ -23,18 +25,15 @@ def transform_mailchimp_response(json_response):
     l = {}
     count = 0
     for member in json_response['members']:
-        count +=1
         data = dict()
-        data["email_address"] = member["email_address"]
-        
+        data["email_address"] = member["email_address"]        
         # copy data in merge_fields
         temp = member["merge_fields"].copy()
         data["First_Name"] = temp['FNAME']
         data["Last_Name"] = temp['LNAME']
-        data["ASU_ID"] = temp['MMERGE3']
-      
+        data["ASU_ID"] = temp['MMERGE3']      
         l[temp['MMERGE3']]  = data
-    print count
+    print l
     return l
 
 class ChimpRequester(object):
@@ -112,5 +111,10 @@ class ChimpRequester(object):
         get_list returns a list of people on a mail chimp list 
         """
         path = "lists/{}/members?count=1600".format(list_id)
+        json_response = self._get_request(path)
+        return json_response.json()
+
+    def update_list(self, list_id, timestamp):
+        path = "lists/{}/members?since_last_changed={}".format(list_id, timestamp)
         json_response = self._get_request(path)
         return json_response.json()
