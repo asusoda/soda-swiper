@@ -1,4 +1,5 @@
 import argparse
+import getpass
 import json
 import datetime
 import chimp
@@ -51,12 +52,27 @@ def update_list(l=None, go=True):
         transform = chimp.transform_mailchimp_response(updated)
         if transform:
             l.update(transform)
-def parse_input(input):
+
+def get_acsii(filename, default_text):
+    if os.path.isfile(filename):
+        with open(filename) as f:
+            ascii_art = f.read()
+        return ascii_art
+    return default_text
+
+def parse_input(input, invalid_text):
+    if len(input) > 1 and input[0] != ';':
+        return input
     if input[:7] == ';601744' and len(input) > 17:
         return input[7:17]
     else:
-        print 'Invalid card swipe: Please swip again!:)'
+        print(chr(27) + "[2J")
+        print invalid_text
+        time.sleep(2)
+        print(chr(27) + "[2J")
+        return False
     return input
+
 def main():
     id = load_mailchimp()
     # bad dawg
@@ -65,15 +81,35 @@ def main():
     d.daemon = True
     d.start()
     checkin = []
+    print(chr(27) + "[2J")
+    soda = get_acsii('soda.txt', 'Welcome to SoDA!')
+    print '\n\n\n\n\n'
+    enter_id_text = get_acsii('enter_id.txt', 'Enter your student ID: ')
+    success_id_text = get_acsii('success_id.txt', 'Success, you are checked in!')
+    mailchimp_text = get_acsii('mailchimp_text.txt','Please enter your information into Mailchimp')
+    invalid_text = get_acsii('invalid.txt', 'Invalid card swipe: Please try again!:)')
     while True:
         try:
-            input = raw_input('Enter your student ID: \n')
-            parsed_input = parse_input(input)
+            print soda
+            print '\n\n\n\n\n'
+            input = getpass.getpass(enter_id_text)
+            parsed_input = parse_input(input, invalid_text)
+            if parsed_input is False:
+                continue
             if parsed_input in id:
-                print 'Success you are checked in!\n'
+                print(chr(27) + "[2J")
+                print success_id_text
+                print '\n\n'
                 checkin.append(id[parsed_input])
+                time.sleep(2)
+                print(chr(27) + "[2J")
+                
             else:
-                print 'Please enter your information into Mailchimp\n'
+                print(chr(27) + "[2J")
+                print mailchimp_text
+                time.sleep(2)
+                print(chr(27) + "[2J")
+
         except KeyboardInterrupt:
             print 'Writing information to file'
             file_name = 'check_in_{}.json'.format(time.time())
