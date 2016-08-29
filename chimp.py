@@ -33,7 +33,6 @@ def transform_mailchimp_response(json_response):
         data["Last_Name"] = temp['LNAME']
         data["ASU_ID"] = temp['MMERGE3']      
         l[temp['MMERGE3']]  = data
-    print l
     return l
 
 class ChimpRequester(object):

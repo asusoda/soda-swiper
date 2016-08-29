@@ -50,8 +50,13 @@ def update_list(l=None, go=True):
 
         transform = chimp.transform_mailchimp_response(updated)
         if transform:
-            print transform
             l.update(transform)
+def parse_input(input):
+    if input[:7] == ';601744' and len(input) > 17:
+        return input[7:17]
+    else:
+        print 'Invalid card swipe: Please swip again!:)'
+    return input
 def main():
     id = load_mailchimp()
     # bad dawg
@@ -63,9 +68,10 @@ def main():
     while True:
         try:
             input = raw_input('Enter your student ID: \n')
-            if input in id:
+            parsed_input = parse_input(input)
+            if parsed_input in id:
                 print 'Success you are checked in!\n'
-                checkin.append(id[input])
+                checkin.append(id[parsed_input])
             else:
                 print 'Please enter your information into Mailchimp\n'
         except KeyboardInterrupt:
