@@ -4,9 +4,11 @@ import json
 import datetime
 import chimp
 import time
+import datetime
 import os
 import threading
 import sys
+import csv
 
 try:
     LIST_ID = os.environ['MAILCHIMP_LIST_ID']
@@ -19,16 +21,6 @@ def load_mailchimp():
         with open('members.json') as f:
             l = json.load(f)
             return l
-    chimp_requester = chimp.ChimpRequester()
-
-    raw_json = chimp_requester.get_list(LIST_ID)
-
-    parsed_json = chimp.transform_mailchimp_response(raw_json)
-    
-    members = {'members': parsed_json}
-    with open('members.json', 'w') as f:
-        json.dump(members, f)
-    return members
 
 def update_members():
     chimp_requester = chimp.ChimpRequester()
@@ -36,10 +28,9 @@ def update_members():
     raw_json = chimp_requester.get_list(LIST_ID)
 
     parsed_json = chimp.transform_mailchimp_response(raw_json)
-    
-    members = {'members': parsed_json}
+
     with open('members.json', 'w') as f:
-        json.dump(members, f)
+        json.dump(parsed_json, f)
 
 
 def update_list(l=None, go=True):
@@ -61,17 +52,15 @@ def get_acsii(filename, default_text):
     return default_text
 
 def parse_input(input, invalid_text):
-    if len(input) > 1 and input[0] != ';':
-        return input
-    if input[:7] == ';601744' and len(input) > 17:
+    # print input[:11]
+    # if len(input) > 1 and input[0] != ';':
+    #     return input
+    if input[:7] == ';601744' and len(input) > 16:
         return input[7:17]
-    else:
-        print(chr(27) + "[2J")
-        print invalid_text
-        time.sleep(2)
-        print(chr(27) + "[2J")
-        return False
-    return input
+    elif input[:10] == '%E?;601744' and len(input) > 19:
+        print input[:11]
+        return input[10:20]
+
 
 def main():
     id = load_mailchimp()
@@ -93,8 +82,8 @@ def main():
             print soda
             print '\n\n\n\n\n'
             input = getpass.getpass(enter_id_text)
-            parsed_input = parse_input(input, invalid_text)
-            if parsed_input is False:
+            parsed_input = unicode(parse_input(input, invalid_text))
+            if parsed_input is None:
                 continue
             if parsed_input in id:
                 print(chr(27) + "[2J")
@@ -112,8 +101,11 @@ def main():
 
         except KeyboardInterrupt:
             print 'Writing information to file'
-            file_name = 'check_in_{}.json'.format(time.time())
-            with open(file_name, 'w') as f:
+            if not os.path.isdir('./sign-ins'):
+                os.mkdir('./sign-ins')
+            file_name = './sign-ins/check_in_{}.json'.format(str(datetime.datetime.utcnow()))
+
+            with open(file_name, 'w+') as f:
                 members = {}
                 members['members'] = checkin
                 json.dump(members, f)

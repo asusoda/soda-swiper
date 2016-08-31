@@ -109,11 +109,16 @@ class ChimpRequester(object):
         """
         get_list returns a list of people on a mail chimp list 
         """
-        path = "lists/{}/members?count=1700".format(list_id)
+        path = "lists/{}/members?count=1600".format(list_id)
         json_response = self._get_request(path)
         return json_response.json()
 
     def update_list(self, list_id, timestamp):
         path = "lists/{}/members?since_last_changed={}".format(list_id, timestamp)
+        json_response = self._get_request(path)
+        return json_response.json()
+    
+    def pull_num_list(self, list_id, num):
+        path = "lists/{}/members?count={}".format(list_id, num)
         json_response = self._get_request(path)
         return json_response.json()
