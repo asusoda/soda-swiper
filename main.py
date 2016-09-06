@@ -4,7 +4,7 @@ import json
 import datetime
 import chimp
 import time
-import datetime
+import logging
 import os
 import threading
 import sys
@@ -13,31 +13,26 @@ import csv
 try:
     LIST_ID = os.environ['MAILCHIMP_LIST_ID']
 except:
-    print 'Error please give a list'
-    sys.exit()
+    logging.fatal('Error please give a list')
 
 def load_mailchimp():
     if os.path.isfile('members.json'):
         with open('members.json') as f:
             l = json.load(f)
             return l
+    logging.fatal('Failure to open members.json')
 
 def update_members():
     chimp_requester = chimp.ChimpRequester()
-
-    raw_json = chimp_requester.get_list(LIST_ID)
-
-    parsed_json = chimp.transform_mailchimp_response(raw_json)
-
-    with open('members.json', 'w') as f:
-        json.dump(parsed_json, f)
+    chimp_requester.raw_update()
 
 
-def update_list(l=None, go=True):
+def update_list(l, go=True):
     c = chimp.ChimpRequester()
     while go:
         t = str(datetime.datetime.utcnow())
         time.sleep(10)
+        logging.debug('Updating list')
         updated = c.update_list(LIST_ID, t)
 
         transform = chimp.transform_mailchimp_response(updated)
@@ -52,19 +47,16 @@ def get_acsii(filename, default_text):
     return default_text
 
 def parse_input(input, invalid_text):
-    # print input[:11]
-    # if len(input) > 1 and input[0] != ';':
-    #     return input
+    if len(input) > 1 and input[0] != ';':
+        return input
     if input[:7] == ';601744' and len(input) > 16:
         return input[7:17]
     elif input[:10] == '%E?;601744' and len(input) > 19:
-        print input[:11]
         return input[10:20]
 
 
 def main():
     id = load_mailchimp()
-    # bad dawg
     go = True 
     d = threading.Thread(name='update', target=update_list, kwargs={'l':id,'go':go})
     d.daemon = True
@@ -100,7 +92,7 @@ def main():
                 print(chr(27) + "[2J")
 
         except KeyboardInterrupt:
-            print 'Writing information to file'
+            logging.debug('Writing information to file')
             if not os.path.isdir('./sign-ins'):
                 os.mkdir('./sign-ins')
             file_name = './sign-ins/check_in_{}.json'.format(str(datetime.datetime.utcnow()))
@@ -109,7 +101,7 @@ def main():
                 members = {}
                 members['members'] = checkin
                 json.dump(members, f)
-            print 'Updating Members.json'
+            logging.debug('Updating Members.json')
             with open('members.json', 'w') as f:
                 json.dump(id, f)
             go = False
@@ -117,10 +109,15 @@ def main():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-u','--update', help='Manually update members.json', action='store_true',
+    parser.add_argument('-u','--update', help='Raw update members.json', action='store_true',
                         default=False, dest='update')
+    parser.add_argument('-d', '--debug', help='Set logging level to debug', action='store_true',
+                        default=False, dest='debug')
 
     args = parser.parse_args()
+
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
     if args.update:
         update_members()
     main()
