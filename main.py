@@ -8,7 +8,6 @@ import logging
 import os
 import threading
 import sys
-import csv
 
 try:
     LIST_ID = os.environ['MAILCHIMP_LIST_ID']
