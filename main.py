@@ -23,7 +23,7 @@ def load_mailchimp():
 
 def update_members():
     chimp_requester = chimp.ChimpRequester()
-    chimp_requester.raw_update()
+    chimp_requester.raw_update(LIST_ID)
 
 
 def update_list(l, go=True):
