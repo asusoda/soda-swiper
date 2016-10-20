@@ -46,12 +46,12 @@ def get_acsii(filename, default_text):
     return default_text
 
 def parse_input(input, invalid_text):
-    if len(input) > 1 and input[0] != ';':
-        return input
     if input[:7] == ';601744' and len(input) > 16:
         return input[7:17]
     elif input[:10] == '%E?;601744' and len(input) > 19:
         return input[10:20]
+    else:
+        return input
 
 
 def main():
@@ -86,6 +86,10 @@ def main():
                 
             else:
                 print(chr(27) + "[2J")
+                checkin.append({
+                    parsed_input: {
+                    }
+                })
                 print mailchimp_text
                 time.sleep(2)
                 print(chr(27) + "[2J")
