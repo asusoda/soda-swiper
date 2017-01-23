@@ -214,7 +214,10 @@ class ChimpRequester(object):
         big_member_dict = {}
         for j_f in json_files:
             with open(j_f, 'r') as f:
-                raw_dict = json.loads(json.load(f)[0]['response'])
+                data = json.load(f)
+                if not data:
+                    continue 
+                raw_dict = json.loads(data[0]['response'])
                 transformed_dict = transform_mailchimp_response(raw_dict)
                 big_member_dict.update(transformed_dict)
         logging.debug("Writing to members.json")
