@@ -1,3 +1,5 @@
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -88,5 +90,8 @@ ENV/
 # Rope project settings
 .ropeproject
 
+# local data
 check_in*.json
 members.json
+backup_members.json
+raw_json_members/
