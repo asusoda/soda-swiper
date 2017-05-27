@@ -54,7 +54,7 @@ def parse_input(input, invalid_text):
         return input
 
 
-def main():
+def run_swiper():
     id = load_mailchimp()
     go = True 
     d = threading.Thread(name='update', target=update_list, kwargs={'l':id,'go':go})
@@ -123,6 +123,6 @@ if __name__ == '__main__':
         logging.basicConfig(level=logging.DEBUG)
     if args.update:
         update_members()
-    main()
+    run_swiper()
 
 
