@@ -22,8 +22,7 @@ def load_mailchimp():
     logging.fatal('Failure to open members.json')
 
 def update_members():
-    chimp_requester = chimp.ChimpRequester()
-    chimp_requester.raw_update(LIST_ID)
+    chimp.ChimpRequester().raw_update(LIST_ID)
 
 
 def update_list(l, go=True):
@@ -55,7 +54,7 @@ def parse_input(input, invalid_text):
 
 
 def run_swiper():
-    id = load_mailchimp()
+    mailchimp_data = load_mailchimp()
     go = True 
     d = threading.Thread(name='update', target=update_list, kwargs={'l':id,'go':go})
     d.daemon = True
@@ -76,11 +75,11 @@ def run_swiper():
             parsed_input = parse_input(i, invalid_text)
             if parsed_input is None:
                 continue
-            if parsed_input in id:
+            if parsed_input in mailchimp_data:
                 print(chr(27) + "[2J")
                 print(success_id_text)
                 print('\n\n')
-                checkin.append(id[parsed_input])
+                checkin.append(mailchimp_data[parsed_input])
                 time.sleep(2)
                 print(chr(27) + "[2J")
                 
@@ -106,7 +105,7 @@ def run_swiper():
                 json.dump(members, f)
             logging.debug('Updating Members.json')
             with open('members.json', 'w') as f:
-                json.dump(id, f)
+                json.dump(mailchimp_data, f)
             go = False
             sys.exit()
 
