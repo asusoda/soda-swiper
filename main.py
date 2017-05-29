@@ -63,23 +63,23 @@ def run_swiper():
     checkin = []
     print(chr(27) + "[2J")
     soda = get_acsii('soda.txt', 'Welcome to SoDA!')
-    print '\n\n\n\n\n'
+    print('\n\n\n\n\n')
     enter_id_text = get_acsii('enter_id.txt', 'Enter your student ID: ')
     success_id_text = get_acsii('success_id.txt', 'Success, you are checked in!')
     mailchimp_text = get_acsii('mailchimp_text.txt','Please enter your information into Mailchimp')
     invalid_text = get_acsii('invalid.txt', 'Invalid card swipe: Please try again!:)')
     while True:
         try:
-            print soda
-            print '\n\n\n\n\n'
-            input = getpass.getpass(enter_id_text)
-            parsed_input = unicode(parse_input(input, invalid_text))
+            print(soda)
+            print('\n\n\n\n\n')
+            i = getpass.getpass(enter_id_text)
+            parsed_input = parse_input(i, invalid_text)
             if parsed_input is None:
                 continue
             if parsed_input in id:
                 print(chr(27) + "[2J")
-                print success_id_text
-                print '\n\n'
+                print(success_id_text)
+                print('\n\n')
                 checkin.append(id[parsed_input])
                 time.sleep(2)
                 print(chr(27) + "[2J")
@@ -90,7 +90,7 @@ def run_swiper():
                     parsed_input: {
                     }
                 })
-                print mailchimp_text
+                print(mailchimp_text)
                 time.sleep(2)
                 print(chr(27) + "[2J")
 

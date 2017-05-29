@@ -7,26 +7,11 @@ import logging
 import datetime
 import glob
 import json
-import StringIO
 import time 
 import tarfile
 import sys
 import shutil
 
-bad_resp_match = lambda status: re.match(r"^[4,5][0-9][0-9]$",status)
-
-def handle_chimp_response(func):
-    """Utility function that loggs the error
-    """
-    def wrapper(*args,**kwargs):
-        r = func(*args,**kwargs)
-        if bad_resp_match(str(r.status_code)):
-            logging.error("Failed to execute mailchimp command")
-            logging.error(r.json())
-        else:
-            logging.info("Mailchimp operation success")
-        return r
-    return wrapper
 def transform_mailchimp_response(json_response):
     l = {}
     for member in json_response['members']:
@@ -61,46 +46,23 @@ class ChimpRequester(object):
          s.auth = (user,apikey)
          return s
     
-    @handle_chimp_response    
     def _post_request(self,path,body=""):
         """
         Return request object from POST request
         """
-        r = self._session.post(self._base_url+path, json.dumps(body))
-        return r
-    
-    @handle_chimp_response   
+        try:
+            return self._session.post(self._base_url+path, json.dumps(body))
+        except Exception as e:
+            return None
+       
     def _get_request(self,path):
         """
         Return request object from GET request
         """
-        r = self._session.get(self._base_url+path)
-        return r
-    
-    @handle_chimp_response   
-    def _patch_request(self,path,body=""):
-        """
-        Return request object from PATCH request
-        """
-        r = self._session.patch(self._base_url+path,body=body)
-        return r
-    
-    @handle_chimp_response   
-    def _put_request(self,path,body=""):
-        """
-        Return request object from PUT request
-        """
-        r = self._session.put(self._base_url+path,body)
-        return r
-    
-    @handle_chimp_response   
-    def _delete_request(self,path):
-        """
-        Return request object from DELETE request
-        """
-        r = self._session.delete(self._base_url+path)
-        return r
-        
+        try:
+            return self._session.get(self._base_url+path)
+        except Exception as e:
+            return None
         
     def add_member(self,list_id,data={}):
         """
@@ -201,7 +163,7 @@ class ChimpRequester(object):
             logging.debug('Removing old json files')
             shutil.rmtree('./raw_json_members')
 
-        with open('raw_members.tar.gz', 'w') as f:
+        with open('raw_members.tar.gz', 'wb') as f:
             r = requests.get(batch_uri)
             f.write(r.content)
     

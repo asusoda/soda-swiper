@@ -1,4 +1,5 @@
 .DS_Store
+raw_members.tar.gz
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
