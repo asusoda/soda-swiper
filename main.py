@@ -56,7 +56,7 @@ def parse_input(input, invalid_text):
 def run_swiper():
     mailchimp_data = load_mailchimp()
     go = True 
-    d = threading.Thread(name='update', target=update_list, kwargs={'l':id,'go':go})
+    d = threading.Thread(name='update', target=update_list, kwargs={'l':mailchimp_data,'go':go})
     d.daemon = True
     d.start()
     checkin = []
